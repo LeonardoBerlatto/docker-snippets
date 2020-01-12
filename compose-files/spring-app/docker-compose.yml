@@ -1,0 +1,26 @@
+version: '3'
+
+# creates a service for spring(see my dockerfile for spring apps) and another for postgres db
+services: 
+  spring: 
+    image: spring-app
+    restart: always
+    ports: 
+      - 80:8080
+    depends_on: 
+      - database
+
+  database:
+    image: postgres
+    restart: always
+    ports: 
+        - 5432:5432
+    environment: 
+      POSTGRES_PASSWORD: root
+    volumes: 
+      - psql-data:/var/lib/postgresql/data
+    
+# external volume for keeping postgres data
+volumes:
+  psql-data: 
+    external: true
