@@ -1,16 +1,15 @@
-# cria build com o alpine do jdk
+# creates build with alpine jdk
 FROM openjdk:8-jdk-alpine as build
 
-# vai para o diretório
 WORKDIR /workspace/app
 
-# copia o necessário pra buildar
+# copies the necessary files
 COPY mvnw .
 COPY .mvn .mvn
 COPY pom.xml .
 COPY src src
 
-# instala o necessário
+# install all it needs
 
 RUN ./mvnw install -DskipTests
 
@@ -19,19 +18,17 @@ RUN mkdir -p target/dependency && (cd target/dependency; jar -xf ../*.jar)
 
 FROM openjdk:8-jdk-alpine
 
-# seta perfil do spring para docker
+# set profile for docker configs
 ENV SPRING_PROFILES_ACTIVE="docker"
-
-VOLUME /tmp
 
 ARG DEPENDENCY=/workspace/app/target/dependency
 
-# copia o que foi gerado no primeiro build
+# copy what the first build generated 
 
 COPY --from=build ${DEPENDENCY}/BOOT-INF/lib /app/lib
 COPY --from=build ${DEPENDENCY}/META-INF /app/META-INF
 COPY --from=build ${DEPENDENCY}/BOOT-INF/classes /app
 
-# executa o comando necessário para subir a aplicação
+# command to deploy application | note that one of the args point to your main file 
 
 ENTRYPOINT ["java","-cp","app:app/lib/*","com.docker.test.dockerapp.DockerAppApplication"]
