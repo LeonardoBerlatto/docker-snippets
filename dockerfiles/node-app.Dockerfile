@@ -6,7 +6,12 @@ RUN mkdir -p /usr/src/app
 
 WORKDIR /usr/src/app
 
-COPY index.js index.js
+COPY package.json package.json
+
+RUN npm install && npm cache clean --force
+
+# use with docker ignore
+COPY ./ ./
 
 EXPOSE 3000
 
