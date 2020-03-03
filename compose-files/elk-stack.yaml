@@ -1,0 +1,39 @@
+version: '3'
+
+services:
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.5.0
+    environment: 
+      - discovery.type=single-node
+    depends_on: 
+      - python-app
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:7.5.0
+    command: logstash -f /user/share/logstash/pipeline/apache.conf
+    volumes:
+      - './logstash/apache.conf:/user/share/logstash/pipeline/apache.conf'
+    ports:
+      - 5044:5044
+    depends_on:
+      - elasticsearch
+
+  filebeat:
+    image: elk-stack/filebeat
+    build:
+      context: './filebeat'
+      dockerfile: Dockerfile
+    command: filebeat -e -strict.perms=false 
+    volumes:
+      - './filebeat/data/logs:/usr/share/data/logs:ro'
+      - './filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml'
+    depends_on: 
+      - logstash
+
+  kibana:
+      image: docker.elastic.co/kibana/kibana:7.5.0
+      ports:
+        - '5601:5601'
+      depends_on:
+        - elasticsearch
