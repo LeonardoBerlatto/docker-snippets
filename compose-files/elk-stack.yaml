@@ -6,8 +6,6 @@ services:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.5.0
     environment: 
       - discovery.type=single-node
-    depends_on: 
-      - python-app
 
   logstash:
     image: docker.elastic.co/logstash/logstash:7.5.0
@@ -26,7 +24,9 @@ services:
       dockerfile: Dockerfile
     command: filebeat -e -strict.perms=false 
     volumes:
-      - './filebeat/data/logs:/usr/share/data/logs:ro'
+      # docker logs
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - './filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml'
     depends_on: 
       - logstash
