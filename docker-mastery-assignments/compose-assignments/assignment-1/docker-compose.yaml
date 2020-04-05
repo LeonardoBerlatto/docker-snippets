@@ -1,0 +1,35 @@
+# my version for compose-assignment #1
+version: '2'
+
+services: 
+    drupal: 
+        image: drupal
+        ports: 
+            - 8080:80
+        volumes:    
+            - drupal-modules:/var/www/html/modules
+            - drupal-profiles:/var/www/html/profiles       
+            - drupal-sites:/var/www/html/sites      
+            - drupal-themes:/var/www/html/themes
+        restart: always
+        # only starts after the chosen database
+        depends_on: 
+            - db
+
+    db:
+        image: postgres
+        ports:
+            - 5432:5432
+        environment: 
+            - POSTGRES_PASSWORD= root
+        volumes:
+            - psql-data:/var/lib/postgresql/data
+        restart: always
+
+volumes:
+    drupal-modules:
+    drupal-profiles:
+    drupal-sites:
+    drupal-themes:
+    psql-data:
+        external: true
